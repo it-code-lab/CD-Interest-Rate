@@ -6,6 +6,10 @@ import com.example.demo.dao.CDRatesStatusRepo;
 import com.example.demo.model.CDHistoricalRates;
 import com.example.demo.model.CDRates;
 import com.example.demo.service.ConversionUtility;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,30 +31,104 @@ public class CDRatesController {
     @Autowired
     private ConversionUtility conversionUtility;
 
-    @GetMapping("/consumer/currentrates/{zip}")
-    private List<CDRates> getRatesForConsumer( @PathVariable String zip){
+    /**
+     * Get certificate of deposit interest rates for consumers.
+     *
+     * @param zip is a valid US zip code.
+     * @return list of deposit interest rates.
+     */
+    @Operation(summary = "Get certificate of deposit interest rates for a zip code", description = "This end point is provided to consumers to view the certificate of deposit interest rates ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Processed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/v1/consumer/currentrates/{zip}")
+    private List<CDRates> getRatesForConsumer( @Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
         return (List<CDRates>) rateRepo.findRatesExcludingManagerRate(state);
     }
 
-    @GetMapping("/consumer/hisoricalrates/{zip}")
-    private List<CDHistoricalRates> getHistoricalRatesForConsumer(@PathVariable String zip){
+    /**
+     * Get historical certificate of deposit interest rates for consumers.
+     *
+     * @param zip is a valid US zip code.
+     * @return list of historical deposit interest rates.
+     */
+    @Operation(summary = "Get historical certificate of deposit interest rates for a zip code", description = "This end point is provided to consumers to view the historical certificate of deposit interest rates ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Processed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/v1/consumer/hisoricalrates/{zip}")
+    private List<CDHistoricalRates> getHistoricalRatesForConsumer(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
         return (List<CDHistoricalRates>) historicalRatesRepo.findRatesExcludingManagerRate(state);
     }
 
-    @GetMapping("/manager/currentrates/{zip}")
-    private List<CDRates> getRates(@PathVariable String zip){
+    /**
+     * Get certificate of deposit interest rates for branch managers.
+     *
+     * @param zip is a valid US zip code.
+     * @return list of deposit interest rates.
+     */
+    @Operation(summary = "Get certificate of deposit interest rates for a zip code", description = "This end point is provided to branch managers to view the certificate of deposit interest rates ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Processed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/v1/manager/currentrates/{zip}")
+    private List<CDRates> getRates(@Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
         return (List<CDRates>) rateRepo.findAllByStateCode(state);
     }
 
-    @PostMapping("/admin/currentrates")
+    /**
+     * Get historical certificate of deposit interest rates for branch managers.
+     *
+     * @param zip is a valid US zip code.
+     * @return list of historical deposit interest rates.
+     */
+    @Operation(summary = "Get historical certificate of deposit interest rates for a zip code", description = "This end point is provided to branch managers to view the historical certificate of deposit interest rates ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Processed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/v1/manager/hisoricalrates/{zip}")
+    private List<CDHistoricalRates> getHistoricalRates(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
+        String state = conversionUtility.getState(zip);
+        return (List<CDHistoricalRates>) historicalRatesRepo.findAllByStateCode(state);
+    }
+
+    /**
+     * Endpoint for bank admins to create new certificate of deposit interest rate records.
+     *
+     */
+    @Operation(summary = "Endpoint to create new certificate of deposit interest rate records", description = "This end point is provided to bank admins to create new certificate of deposit interest rate records ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Processed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/v1/admin/currentrates")
     private CDRates addCurrentRates(@RequestBody CDRates newRate){
         return rateRepo.save(newRate);
     }
 
-    @PutMapping("/admin/rate/{id}")
+    /**
+     * Endpoint for bank admins to update status of certificate of deposit interest rate records.
+     *
+     */
+    @Operation(summary = "Endpoint to update status of certificate of deposit interest rate records", description = "This end point is provided to bank admins to update status of certificate of deposit interest rate records ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Processed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("/v1/admin/rate/{id}")
     private Optional<CDRates> updateRate(@RequestBody CDRates newRate, @PathVariable String id){
 
         return rateRepo.findById(id)
@@ -60,7 +138,17 @@ public class CDRatesController {
                 });
     }
 
-    @PutMapping("/admin/archiverate/{id}")
+    /**
+     * Endpoint to archive certificate of deposit interest rate records.
+     *
+     */
+    @Operation(summary = "Endpoint to archive certificate of deposit interest rate records", description = "This end point is used to archive the certificate of deposit interest rate records ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Processed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("/v1/admin/archiverate/{id}")
     private Optional<CDRates> archiveRate(@RequestBody CDRates oldRate, @PathVariable String id){
 
          return rateRepo.findById(id)
