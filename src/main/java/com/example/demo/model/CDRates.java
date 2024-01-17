@@ -14,6 +14,7 @@ public class CDRates {
     private double interestRate;
     private double managerRate;
     private double APY;
+    private String stateCode;
     private int minimumDeposit;
     private int maximumDeposit;
     private int penaltyDays;
@@ -28,12 +29,13 @@ public class CDRates {
     public CDRates(){
 
     }
-    public CDRates(String cdUniqueId, String termLength, double interestRate, double managerRate, double APY, int minimumDeposit, int maximumDeposit, int penaltyDays, double penaltyPercentage, String cdType, String status, Date startDate, Date endDate, String createdBy, String updatedBy) {
+    public CDRates(String cdUniqueId, String termLength, double interestRate, double managerRate, double APY, String stateCode, int minimumDeposit, int maximumDeposit, int penaltyDays, double penaltyPercentage, String cdType, String status, Date startDate, Date endDate, String createdBy, String updatedBy) {
         this.cdUniqueId = cdUniqueId;
         this.termLength = termLength;
         this.interestRate = interestRate;
         this.managerRate = managerRate;
         this.APY = APY;
+        this.stateCode = stateCode;
         this.minimumDeposit = minimumDeposit;
         this.maximumDeposit = maximumDeposit;
         this.penaltyDays = penaltyDays;
@@ -47,11 +49,12 @@ public class CDRates {
     }
 
     //Excluding Manager Rate
-    public CDRates(String cdUniqueId, String termLength, double interestRate,  double APY, int minimumDeposit, int maximumDeposit, int penaltyDays, double penaltyPercentage, String cdType, String status, Date startDate, Date endDate, String createdBy, String updatedBy) {
+    public CDRates(String cdUniqueId, String termLength, double interestRate,  double APY, String stateCode , int minimumDeposit, int maximumDeposit, int penaltyDays, double penaltyPercentage, String cdType, String status, Date startDate, Date endDate, String createdBy, String updatedBy) {
         this.cdUniqueId = cdUniqueId;
         this.termLength = termLength;
         this.interestRate = interestRate;
         this.APY = APY;
+        this.stateCode = stateCode;
         this.minimumDeposit = minimumDeposit;
         this.maximumDeposit = maximumDeposit;
         this.penaltyDays = penaltyDays;
@@ -173,5 +176,21 @@ public class CDRates {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public String getStateCode() {
+        return stateCode;
+    }
+
+    public void setStateCode(String stateCode) {
+        this.stateCode = stateCode;
+    }
+
+    public int getMaximumDeposit() {
+        return maximumDeposit;
+    }
+
+    public void setMaximumDeposit(int maximumDeposit) {
+        this.maximumDeposit = maximumDeposit;
     }
 }

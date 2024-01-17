@@ -5,6 +5,7 @@ import com.example.demo.dao.CDRatesRepo;
 import com.example.demo.dao.CDRatesStatusRepo;
 import com.example.demo.model.CDHistoricalRates;
 import com.example.demo.model.CDRates;
+import com.example.demo.service.ConversionUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,19 +24,25 @@ public class CDRatesController {
     @Autowired
     private CDHistoricalRatesRepo historicalRatesRepo;
 
-    @GetMapping("/consumer/currentrates")
-    private List<CDRates> getRatesForConsumer(){
-        return (List<CDRates>) rateRepo.findRatesExcludingManagerRate();
+    @Autowired
+    private ConversionUtility conversionUtility;
+
+    @GetMapping("/consumer/currentrates/{zip}")
+    private List<CDRates> getRatesForConsumer( @PathVariable String zip){
+        String state = conversionUtility.getState(zip);
+        return (List<CDRates>) rateRepo.findRatesExcludingManagerRate(state);
     }
 
-    @GetMapping("/consumer/hisoricalrates")
-    private List<CDRates> getHistoricalRatesForConsumer(){
-        return (List<CDRates>) historicalRatesRepo.findRatesExcludingManagerRate();
+    @GetMapping("/consumer/hisoricalrates/{zip}")
+    private List<CDHistoricalRates> getHistoricalRatesForConsumer(@PathVariable String zip){
+        String state = conversionUtility.getState(zip);
+        return (List<CDHistoricalRates>) historicalRatesRepo.findRatesExcludingManagerRate(state);
     }
 
-    @GetMapping("/manager/currentrates")
-    private List<CDRates> getRates(){
-        return (List<CDRates>) rateRepo.findAll();
+    @GetMapping("/manager/currentrates/{zip}")
+    private List<CDRates> getRates(@PathVariable String zip){
+        String state = conversionUtility.getState(zip);
+        return (List<CDRates>) rateRepo.findAllByStateCode(state);
     }
 
     @PostMapping("/admin/currentrates")
