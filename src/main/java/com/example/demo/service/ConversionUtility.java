@@ -8,8 +8,8 @@ public class ConversionUtility {
 
         // Ensure param is a string to prevent unpredictable parsing results
         if (zipString == null || zipString.length() != 5) {
-            System.err.println("Must pass a 5-digit zipcode.");
-            return null;
+            //System.err.println("Must pass a 5-digit zipcode.");
+            return "";
         }
 
         // Ensure we don't parse strings starting with 0 as octal values
@@ -176,9 +176,9 @@ public class ConversionUtility {
             st = "WY";
             state = "Wyoming";
         } else {
-            st = "none";
-            state = "none";
-            System.out.println("No state found matching " + zipcode);
+            st = "";
+            state = "";
+            //System.out.println("No state found matching " + zipcode);
         }
 
         // Return `state` for the full name or `st` for the postal abbreviation

@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dao.CDHistoricalRatesRepo;
 import com.example.demo.dao.CDRatesRepo;
 import com.example.demo.dao.CDRatesStatusRepo;
+import com.example.demo.exception.CustomBadRequestException;
 import com.example.demo.model.CDHistoricalRates;
 import com.example.demo.model.CDRates;
 import com.example.demo.service.ConversionUtility;
@@ -11,9 +12,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -44,9 +45,12 @@ public class CDRatesController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/v1/consumer/currentrates/{zip}")
-    private List<CDRates> getRatesForConsumer( @Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
+    private ResponseEntity<CDRates> getRatesForConsumer(@Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
-        return (List<CDRates>) rateRepo.findRatesExcludingManagerRate(state);
+        if (state.equals("")){
+            throw new CustomBadRequestException("Invalid zip supplied");
+        }
+        return (ResponseEntity<CDRates>) rateRepo.findRatesExcludingManagerRate(state);
     }
 
     /**
@@ -62,9 +66,12 @@ public class CDRatesController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/v1/consumer/hisoricalrates/{zip}")
-    private List<CDHistoricalRates> getHistoricalRatesForConsumer(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
+    private ResponseEntity<CDHistoricalRates> getHistoricalRatesForConsumer(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
-        return (List<CDHistoricalRates>) historicalRatesRepo.findRatesExcludingManagerRate(state);
+        if (state.equals("")){
+            throw new CustomBadRequestException("Invalid zip supplied");
+        }
+        return (ResponseEntity<CDHistoricalRates>) historicalRatesRepo.findRatesExcludingManagerRate(state);
     }
 
     /**
@@ -80,9 +87,12 @@ public class CDRatesController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/v1/manager/currentrates/{zip}")
-    private List<CDRates> getRates(@Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
+    private ResponseEntity<CDRates> getRates(@Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
-        return (List<CDRates>) rateRepo.findAllByStateCode(state);
+        if (state.equals("")){
+            throw new CustomBadRequestException("Invalid zip supplied");
+        }
+        return (ResponseEntity<CDRates>) rateRepo.findAllByStateCode(state);
     }
 
     /**
@@ -98,14 +108,18 @@ public class CDRatesController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/v1/manager/hisoricalrates/{zip}")
-    private List<CDHistoricalRates> getHistoricalRates(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
+    private ResponseEntity<CDHistoricalRates> getHistoricalRates(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
-        return (List<CDHistoricalRates>) historicalRatesRepo.findAllByStateCode(state);
+        if (state.equals("")){
+            throw new CustomBadRequestException("Invalid zip supplied");
+        }
+        return (ResponseEntity<CDHistoricalRates>) historicalRatesRepo.findAllByStateCode(state);
     }
 
     /**
      * Endpoint for bank admins to create new certificate of deposit interest rate records.
      *
+     * @return
      */
     @Operation(summary = "Endpoint to create new certificate of deposit interest rate records", description = "This end point is provided to bank admins to create new certificate of deposit interest rate records ")
     @ApiResponses(value = {
