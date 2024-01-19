@@ -6,15 +6,21 @@ import com.example.demo.dao.CDRatesStatusRepo;
 import com.example.demo.exception.CustomBadRequestException;
 import com.example.demo.model.CDHistoricalRates;
 import com.example.demo.model.CDRates;
+import com.example.demo.model.CDRatesWithoutManagerRate;
 import com.example.demo.service.ConversionUtility;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -32,6 +38,8 @@ public class CDRatesController {
     @Autowired
     private ConversionUtility conversionUtility;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CDRatesController.class);
+
     /**
      * Get certificate of deposit interest rates for consumers.
      *
@@ -45,12 +53,16 @@ public class CDRatesController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/v1/consumer/currentrates/{zip}")
-    private ResponseEntity<CDRates> getRatesForConsumer(@Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
+    private ResponseEntity<List<CDRatesWithoutManagerRate>> getRatesForConsumer(@Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
+        LOGGER.info("getRatesForConsumer request received for Zip " + zip);
         if (state.equals("")){
             throw new CustomBadRequestException("Invalid zip supplied");
         }
-        return (ResponseEntity<CDRates>) rateRepo.findRatesExcludingManagerRate(state);
+        //ResponseEntity<CDRates> rates = (ResponseEntity<CDRates>) rateRepo.findRatesExcludingManagerRate(state);
+        //LOGGER.info(String.valueOf(rates));
+        //return rates;
+        return ResponseEntity.ok(rateRepo.findRatesExcludingManagerRate(state)) ;
     }
 
     /**
@@ -66,12 +78,15 @@ public class CDRatesController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/v1/consumer/hisoricalrates/{zip}")
-    private ResponseEntity<CDHistoricalRates> getHistoricalRatesForConsumer(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
+    private ResponseEntity<List<CDRatesWithoutManagerRate>> getHistoricalRatesForConsumer(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
         if (state.equals("")){
             throw new CustomBadRequestException("Invalid zip supplied");
         }
-        return (ResponseEntity<CDHistoricalRates>) historicalRatesRepo.findRatesExcludingManagerRate(state);
+
+        Instant eightYearsAgo = Instant.now().minus(Duration.ofDays(365 * 8));
+
+        return ResponseEntity.ok(historicalRatesRepo.findRatesExcludingManagerRate(state, eightYearsAgo)) ;
     }
 
     /**
@@ -87,12 +102,12 @@ public class CDRatesController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/v1/manager/currentrates/{zip}")
-    private ResponseEntity<CDRates> getRates(@Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
+    private ResponseEntity<List<CDRates>> getRates(@Parameter(description = "Please enter valid US zip code to view certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
         if (state.equals("")){
             throw new CustomBadRequestException("Invalid zip supplied");
         }
-        return (ResponseEntity<CDRates>) rateRepo.findAllByStateCode(state);
+        return ResponseEntity.ok(rateRepo.findAllByStateCode(state)) ;
     }
 
     /**
@@ -108,12 +123,13 @@ public class CDRatesController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/v1/manager/hisoricalrates/{zip}")
-    private ResponseEntity<CDHistoricalRates> getHistoricalRates(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
+    private ResponseEntity<List<CDRates>> getHistoricalRates(@Parameter(description = "Please enter valid US zip code to view historical certificate of deposit interest rates", required = true) @PathVariable String zip){
         String state = conversionUtility.getState(zip);
         if (state.equals("")){
             throw new CustomBadRequestException("Invalid zip supplied");
         }
-        return (ResponseEntity<CDHistoricalRates>) historicalRatesRepo.findAllByStateCode(state);
+        Instant eightYearsAgo = Instant.now().minus(Duration.ofDays(365 * 8));
+        return ResponseEntity.ok(historicalRatesRepo.findAllByStateCode(state, eightYearsAgo)) ;
     }
 
     /**
@@ -168,19 +184,19 @@ public class CDRatesController {
          return rateRepo.findById(id)
                 .map(rate -> {
                     rateRepo.delete(rate);
-                    CDHistoricalRates historicalRate = new CDHistoricalRates();
+//                    CDHistoricalRates historicalRate = new CDHistoricalRates();
+//
+//                    historicalRate.setAPY(oldRate.getAPY());
+//                    historicalRate.setInterestRate(oldRate.getInterestRate());
+//                    historicalRate.setManagerRate(oldRate.getManagerRate());
+//                    historicalRate.setCdType(oldRate.getCdType());
+//                    historicalRate.setStatus(oldRate.getStatus());
+//                    historicalRate.setCdUniqueId(oldRate.getCdUniqueId());
+//                    historicalRate.setStatus(oldRate.getStatus());
+//                    historicalRate.setEndDate(oldRate.getEndDate());
+//                    historicalRate.setCreatedBy(oldRate.getCreatedBy());
 
-                    historicalRate.setAPY(oldRate.getAPY());
-                    historicalRate.setInterestRate(oldRate.getInterestRate());
-                    historicalRate.setManagerRate(oldRate.getManagerRate());
-                    historicalRate.setCdType(oldRate.getCdType());
-                    historicalRate.setStatus(oldRate.getStatus());
-                    historicalRate.setCdUniqueId(oldRate.getCdUniqueId());
-                    historicalRate.setStatus(oldRate.getStatus());
-                    historicalRate.setEndDate(oldRate.getEndDate());
-                    historicalRate.setCreatedBy(oldRate.getCreatedBy());
-
-                    historicalRatesRepo.save(historicalRate);
+                    historicalRatesRepo.save(oldRate);
                     return null;
                 });
     }

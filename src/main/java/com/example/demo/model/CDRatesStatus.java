@@ -1,11 +1,14 @@
 package com.example.demo.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.cassandra.core.mapping.Table;
+
+//import javax.persistence.Entity;
+//import javax.persistence.Id;
+//import javax.persistence.Table;
 import java.util.Date;
 
-@Entity
+//@Entity
 @Table
 public class CDRatesStatus {
 
